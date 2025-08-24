@@ -1,4 +1,4 @@
-# <p align=center>`TIP for Domain-Adaptive Semantic Segmentation`</p><!-- omit in toc -->
+# <p align=center>`LVP for Domain-Adaptive Semantic Segmentation`</p><!-- omit in toc -->
 
 ## Table of Contents
 
