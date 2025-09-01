@@ -30,8 +30,8 @@ For this project, we used python 3.8.5. We recommend setting up a new virtual
 environment:
 
 ```shell
-python -m venv ~/venv/TIP-seg
-source ~/venv/TIP-seg/bin/activate
+python -m venv ~/venv/LVP-UDASeg
+source ~/venv/LVP-UDASeg/bin/activate
 ```
 
 In that environment, the requirements can be installed with:
