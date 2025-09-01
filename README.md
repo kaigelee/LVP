@@ -68,7 +68,7 @@ them to `data/gta`.
 The final folder structure should look like this:
 
 ```none
-TIP
+LVP
 ├── ...
 ├── data
 │   ├── cityscapes
