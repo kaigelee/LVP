@@ -100,7 +100,7 @@ For more information about the framework structure and the config system,
 please refer to the [mmsegmentation documentation](https://mmsegmentation.readthedocs.io/en/latest/index.html)
 and the [mmcv documentation](https://mmcv.readthedocs.ihttps://arxiv.org/abs/2007.08702o/en/v1.3.7/index.html).
 
-
+```python
 # ===== Overall Training with Language & Vision Priors (LVP) =====
 # Task: Unsupervised Domain Adaptive Semantic Segmentation
 # Loss: L_total = L_ce + α L_da + (L_ta + β L_pa) + (L_pc + γ L_rc)   
@@ -220,7 +220,7 @@ for step in range(max_iters):
     UpdateEMA(teacher=f_φ, student=(gθ, h_cls))
 
 # End for
-
+```
 
 ##  5. Acknowledgements
 
