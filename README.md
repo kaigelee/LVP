@@ -101,6 +101,129 @@ please refer to the [mmsegmentation documentation](https://mmsegmentation.readth
 and the [mmcv documentation](https://mmcv.readthedocs.ihttps://arxiv.org/abs/2007.08702o/en/v1.3.7/index.html).
 
 
+'''
+# ===== Overall Training with Language & Vision Priors (LVP) =====
+# Task: Unsupervised Domain Adaptive Semantic Segmentation
+# Loss: L_total = L_ce + α L_da + (L_ta + β L_pa) + (L_pc + γ L_rc)   
+
+# -----------------------------
+# 0) Preparation
+# -----------------------------
+# Inputs:
+#   DS = {(x_s, y_s)}          # labeled source data
+#   DT = {x_t}                 # unlabeled target data
+#   Classes = [c_1, ..., c_C]  # class names
+# Hyper-params:
+α = 1.0     # balance for UDA (self-training / adversarial) loss  
+β = 0.01    # weight for prototype assignment loss                 
+γ = 0.25    # weight for reconstruction consistency                
+K = 5       # prototypes per class                                 
+m = 16      # learnable context length for prompts                 
+τ = 0.1     # temperature for cosine-similarity losses             
+
+# Models:
+#   gθ        : feature encoder
+#   h_cls     : segmentation head
+#   h_proj    : projection head for pixel embeddings
+#   h_rec     : reconstruction head (for VP)
+#   TextEncoder(·): frozen text encoder (e.g., CLIP)               
+
+# Teacher (EMA):
+#   f_φ = h_cls ∘ g_{θ̄}   # teacher used to produce target pseudo-labels  
+
+# -----------------------------
+# 1) Build Language Prototypes (LP)
+# -----------------------------
+# Learnable contexts: Z_k ∈ R^{m×D}, k = 1..K
+Z = {Z_k for k in range(1, K+1)}  # learnable
+
+# For each class c, build K prompt variants and encode to get textual prototypes
+P = {}  # P[c] = [p_{c,1}, ..., p_{c,K}]
+for c in Classes:
+    P[c] = []
+    for k in range(1, K+1):
+        t_ck = concat(Z_k, embedding(c))          # tc,k = [Z_k, e_c]          
+        p_ck = TextEncoder(t_ck)                   # pc,k = TextEncoder(tc,k)   
+        P[c].append(p_ck)
+
+# -----------------------------
+# 2) Training Loop
+# -----------------------------
+for step in range(max_iters):
+
+    # ---- Sample mini-batch ----
+    (x_s, y_s) ~ DS
+    x_t ~ DT
+
+    # ---- Supervised on source ----
+    feat_s = gθ(x_s)
+    logits_s = h_cls(feat_s)
+    L_ce = CrossEntropy(logits_s, y_s)            # supervised CE on source     
+
+    # ---- Pseudo-labels on target (teacher EMA) ----
+    with no_grad():
+        logits_t_teacher = f_φ(x_t)
+        y_hat_t, q_t = ArgmaxWithConfidence(logits_t_teacher)   # labels + confidence
+    # Self-training style adaptation loss (e.g., CE weighted by confidence)      
+    feat_t = gθ(x_t)
+    logits_t = h_cls(feat_t)
+    L_da = WeightedCE(logits_t, y_hat_t, weight=q_t)
+
+    # ---- Language Prior losses (LP) ----
+    # Pixel embeddings for LP alignment
+    V_s = h_proj(feat_s)      # pixel-wise visual embeddings (source)
+    V_t = h_proj(feat_t)      # pixel-wise visual embeddings (target)
+    V_all, Y_all = concat(V_s, V_t), concat(y_s, y_hat_t)
+
+    # (a) Online clustering within each class via optimal transport (Sinkhorn)    
+    #     Assign each pixel embedding v to one of K prototypes of its class.
+    assignments = {}
+    for c in Classes:
+        V_c = select_by_class(V_all, Y_all, c)
+        # assignments[c]: one-hot over {1..K} for each pixel of class c
+        assignments[c] = SinkhornCluster(V_c, P[c])                                   # 
+
+    # (b) Textual Alignment loss (inter-class): pull v to closest prototype of its class,
+    #     push away closest prototypes of other classes                               
+    L_ta = TextualAlignmentLoss(V_all, Y_all, P, temperature=τ)
+
+    # (c) Prototype Assignment loss (intra-class): pull v to its assigned prototype,
+    #     push away other prototypes (same- & cross-class)                            
+    L_pa = PrototypeAssignmentLoss(V_all, Y_all, P, assignments, temperature=τ)
+
+    # ---- Vision Prior losses (VP) ----
+    # Reliability map from pseudo-label confidence (encourage masking uncertain/rare)  
+    R = ReliabilityMapFromConfidence(logits_t_teacher, neigh_radius=3, thresh=0.968)  # Eq.(11)
+
+    # Build bi-directional progressive masks (in→out / out→in)                         
+    regions = PartitionIntoRings(x_t, num_regions=4)                                   # Fig.4
+    mask_in  = ProgressiveMask(regions, order="in_out",  reliability_map=R,
+                               mask_ratios=[0.65, 0.70, 0.70, 0.75])                   # 
+    mask_out = ProgressiveMask(regions, order="out_in", reliability_map=R,
+                               mask_ratios=[0.75, 0.70, 0.70, 0.65])                   # dual
+
+    # Randomly choose one painting (mutually exclusive)                                
+    xP = ApplyMask(x_t, choice(mask_in, mask_out, p_out_in=0.4))                       # ε=0.4
+
+    # Consistency to full-image prediction                                             
+    logits_mask = h_cls(gθ(xP))
+    L_pc = WeightedCE(logits_mask, y_hat_t, weight=q_t)                                # prediction consistency
+
+    # Reconstruction consistency                                                       
+    xR = h_rec(gθ(xP))
+    L_rc = L1(xR, x_t)
+
+    # ---- Total loss ----
+    L_total = L_ce + α * L_da + (L_ta + β * L_pa) + (L_pc + γ * L_rc)
+
+    # ---- Optimize student, update teacher with EMA ----
+    Optimize(L_total, params=[gθ, h_cls, h_proj, h_rec, Z])
+    UpdateEMA(teacher=f_φ, student=(gθ, h_cls))
+
+# End for
+
+'''
+
 ##  5. Acknowledgements
 
 TIP is based on the following open-source projects. We thank their
