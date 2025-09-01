@@ -20,7 +20,7 @@ As discussed in [8](https://github.com/lhoyer/MIC/issues/8), [54](https://github
 
 To address this, we will release two versions of the code: one designed to produce more stable results with lower standard deviation, and another that achieves higher performance albeit with greater variance. :smiley:
 
-Note, however, that the mathematical expectation of performance is the same for both, i.e., 76.6% mIoU and 68.9% mIoU on GTAV→Cityscapes and SYNTHIA→Cityscapes, respectively. :100:
+Note, however, that the mathematical expectation of performance is the same for both, i.e., **76.6%** mIoU and **68.9%** mIoU on GTAV→Cityscapes and SYNTHIA→Cityscapes, respectively. :100:
 
 ## 1. Introduction
 
@@ -99,6 +99,19 @@ This project is based on [mmsegmentation version 0.16.0](https://github.com/open
 For more information about the framework structure and the config system,
 please refer to the [mmsegmentation documentation](https://mmsegmentation.readthedocs.io/en/latest/index.html)
 and the [mmcv documentation](https://mmcv.readthedocs.ihttps://arxiv.org/abs/2007.08702o/en/v1.3.7/index.html).
+
+
+🔑 **Key Idea**
+
+Our Language-Vision Prior (LVP) combines:
+
+Language Prior (LP): multi-prototype prompts capture class-level semantics and intra-class variance.
+
+Vision Prior (VP): bi-directional masking encourages robust global-local reasoning.
+
+Together, they guide stable and reliable domain adaptation.
+
+**Overall Training Pseudocode**
 
 ```python
 # ===== Overall Training with Language & Vision Priors (LVP) =====
