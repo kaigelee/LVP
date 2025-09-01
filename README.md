@@ -9,11 +9,6 @@
   * [Acknowledgements](#5-Acknowledgements)
 
 
-## Code Availability Statement
-This code is associated with a paper currently under review. To comply with the review process, the code will be made publicly available once the paper is accepted. 
-
-We appreciate your understanding and patience. Once the code is released, we will warmly welcome any feedback and suggestions. Please stay tuned for our updates!
-
 ## Code Implementation Statement
 
 As discussed in [8](https://github.com/lhoyer/MIC/issues/8), [54](https://github.com/lhoyer/MIC/issues/54) and [63](https://github.com/lhoyer/MIC/issues/63), **our method inherits the instability of [MIC](https://github.com/lhoyer/MIC).** :cry:
@@ -244,3 +239,10 @@ authors for making the source code publicly available.
 * [MMSegmentation](https://github.com/open-mmlab/mmsegmentation)
 * [SegFormer](https://github.com/NVlabs/SegFormer)
 * [DACS](https://github.com/vikolss/DACS)
+
+
+
+## Code Availability Statement
+This code is associated with a paper currently under review. To comply with the review process, the code will be made publicly available once the paper is accepted. 
+
+We appreciate your understanding and patience. Once the code is released, we will warmly welcome any feedback and suggestions. Please stay tuned for our updates!
