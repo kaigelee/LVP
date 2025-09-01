@@ -105,9 +105,9 @@ and the [mmcv documentation](https://mmcv.readthedocs.ihttps://arxiv.org/abs/200
 
 Our Language-Vision Prior (LVP) combines:
 
-Language Prior (LP): multi-prototype prompts capture class-level semantics and intra-class variance.
+* Language Prior (LP): multi-prototype prompts capture class-level semantics and intra-class variance.
 
-Vision Prior (VP): bi-directional masking encourages robust global-local reasoning.
+* Vision Prior (VP): bi-directional masking encourages robust global-local reasoning.
 
 Together, they guide stable and reliable domain adaptation.
 
