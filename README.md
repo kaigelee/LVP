@@ -18,7 +18,7 @@ We appreciate your understanding and patience. Once the code is released, we wil
 
 As discussed in [8](https://github.com/lhoyer/MIC/issues/8), [54](https://github.com/lhoyer/MIC/issues/54) and [63](https://github.com/lhoyer/MIC/issues/63), **our method inherits the instability of [MIC](https://github.com/lhoyer/MIC).** :cry:
 
-To this end, we will provide two versions of the code, one of which produces more stable results with smaller standard deviation and the other which produces higher performance with higher standard deviation. :smiley:
+To address this, we will release two versions of the code: one designed to produce more stable results with lower standard deviation, and another that achieves higher performance albeit with greater variance. :smiley:
 
 Note, however, that the mathematical expectation of performance is the same for both, i.e., 76.6% mIoU and 68.9% mIoU on GTAV→Cityscapes and SYNTHIA→Cityscapes, respectively. :100:
 
