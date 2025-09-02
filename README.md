@@ -243,6 +243,6 @@ authors for making the source code publicly available.
 
 
 ## Code Availability Statement
-This code is associated with a paper currently under review. To comply with the review process, the code will be made publicly available once the paper is accepted. 
+This code is associated with a paper currently under review. To comply with the review process, the code will be made FULLY available once the paper is accepted. 
 
 We appreciate your understanding and patience. Once the code is released, we will warmly welcome any feedback and suggestions. Please stay tuned for our updates!
