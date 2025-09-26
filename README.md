@@ -289,37 +289,53 @@ import torch
 import math
 
 def allocate_prototypes(feats_by_class, K_total, K_min=1, K_max=10, alpha=0.7, beta=0.3, eps=1e-8):
-    # feats_by_class: {cls: Tensor(N_c, C)}
+    """
+    Allocate prototype counts per class based on intra-class diversity and sample size.
+
+    Args:
+        feats_by_class (dict[int, torch.Tensor]): A dictionary mapping class -> features (N_c, C).
+        K_total (int): Total number of prototypes across all classes.
+        K_min (int): Minimum number of prototypes per class (default=1).
+        K_max (int): Maximum number of prototypes per class (default=10).
+        alpha (float): Weight for diversity in allocation (default=0.7).
+        beta (float): Weight for sample count in allocation (default=0.3).
+        eps (float): Small epsilon to avoid division by zero.
+
+    Returns:
+        dict[int, int]: A dictionary mapping each class to its allocated number of prototypes.
+    """
     classes = sorted(feats_by_class.keys())
-    D, L = [], []  # diversity, log-count
+    D, L = [], []  # store diversity and log-count values
+
     for c in classes:
         X = feats_by_class[c]
-        # 用协方差迹作为多样性；也可换成子采样平均两两距离
+        # Use covariance trace as a measure of diversity
         Xc = X - X.mean(dim=0, keepdim=True)
         cov_trace = (Xc.T @ Xc / max(1, X.shape[0]-1)).diag().sum().item()
         D.append(max(cov_trace, 0.0))
-        L.append(math.log1p(X.shape[0]))
+        L.append(math.log1p(X.shape[0]))  # log(1 + sample size)
 
+    # Normalize diversity and sample size contributions
     D_sum = sum(D) + eps
     L_sum = sum(L) + eps
     d_hat = [d / D_sum for d in D]
     n_hat = [l / L_sum for l in L]
 
+    # Initial allocation: ensure each class has at least K_min
     base = K_min * len(classes)
     room = max(K_total - base, 0)
     q = [alpha * d + beta * n for d, n in zip(d_hat, n_hat)]
     q_sum = sum(q) + eps
-    k_float = [K_min + room * (qi / q_sum) for qi in q]  # 先按比例分配
+    k_float = [K_min + room * (qi / q_sum) for qi in q]  # float allocation
 
-    # 四舍五入 + 最大剩余法修正到总数
+    # Round allocations and apply min/max limits
     k_round = [int(round(x)) for x in k_float]
-    # 先裁剪上下限
     k_round = [max(K_min, min(K_max, k)) for k in k_round]
-    diff = K_total - sum(k_round)
 
-    # 若总和不等于 K_total，按小数部分/需求大小做增减
+    # Adjust to make sure the total sum equals K_total
+    diff = K_total - sum(k_round)
     if diff != 0:
-        # 计算偏差优先级（谁离目标浮点更远谁先调整）
+        # Priority: adjust classes whose rounded value deviates most from float target
         prio = sorted(
             range(len(classes)),
             key=lambda i: (k_float[i] - k_round[i]),
