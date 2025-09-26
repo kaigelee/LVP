@@ -353,3 +353,12 @@ def allocate_prototypes(feats_by_class, K_total, K_min=1, K_max=10, alpha=0.7, b
     return K_dict
 
 ```
+
+
+
+
+## Code Availability Statement
+This code is associated with a paper currently under review. To comply with the review process, the code will be made FULLY available once the paper is accepted. 
+
+We appreciate your understanding and patience. Once the code is released, we will warmly welcome any feedback and suggestions. Please stay tuned for our updates!
+
