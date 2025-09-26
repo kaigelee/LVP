@@ -246,3 +246,95 @@ authors for making the source code publicly available.
 This code is associated with a paper currently under review. To comply with the review process, the code will be made FULLY available once the paper is accepted. 
 
 We appreciate your understanding and patience. Once the code is released, we will warmly welcome any feedback and suggestions. Please stay tuned for our updates!
+
+
+
+# Future Work
+
+## Multi-Prototype Representation
+
+Current results indicate that **small-object classes** (e.g., *traffic light*, *traffic sign*, *pole*) show higher intra-class diversity, while **large-area classes** (e.g., *road*, *sky*) appear more homogeneous. Using a single prototype per class may not be sufficient to capture such diversity.
+
+### Directions
+
+- **Adaptive Prototype Allocation**
+  - Allocate prototypes per class based on:
+    - *Intra-class diversity* (e.g., covariance trace, mean pairwise distance).
+    - *Effective sample size* (e.g., log of pixel count).
+    - *Resource budget* (global prototype limit with min/max constraints).
+
+- **Dynamic Selection**
+  - Explore automatic methods to determine prototype counts:
+    - *k-means* with silhouette or Davies–Bouldin scores.
+    - *Gaussian Mixture Models* with BIC/AIC.
+
+- **Class-Specific Strategies**
+  - Small-object classes with heterogeneous appearance → more prototypes.
+  - Large-object classes with stable texture → fewer prototypes.
+
+- **Evaluation Metrics**
+  - Monitor **intra-class coverage** (distance to nearest prototype).
+  - Monitor **inter-class separation** (margin to non-class prototypes).
+  - Use these signals to refine prototype allocation.
+
+---
+
+*The goal is to better capture intra-class variability without overspending resources, paving the way for finer-grained representation and improved segmentation quality.*
+
+
+
+```python
+
+import torch
+import math
+
+def allocate_prototypes(feats_by_class, K_total, K_min=1, K_max=10, alpha=0.7, beta=0.3, eps=1e-8):
+    # feats_by_class: {cls: Tensor(N_c, C)}
+    classes = sorted(feats_by_class.keys())
+    D, L = [], []  # diversity, log-count
+    for c in classes:
+        X = feats_by_class[c]
+        # 用协方差迹作为多样性；也可换成子采样平均两两距离
+        Xc = X - X.mean(dim=0, keepdim=True)
+        cov_trace = (Xc.T @ Xc / max(1, X.shape[0]-1)).diag().sum().item()
+        D.append(max(cov_trace, 0.0))
+        L.append(math.log1p(X.shape[0]))
+
+    D_sum = sum(D) + eps
+    L_sum = sum(L) + eps
+    d_hat = [d / D_sum for d in D]
+    n_hat = [l / L_sum for l in L]
+
+    base = K_min * len(classes)
+    room = max(K_total - base, 0)
+    q = [alpha * d + beta * n for d, n in zip(d_hat, n_hat)]
+    q_sum = sum(q) + eps
+    k_float = [K_min + room * (qi / q_sum) for qi in q]  # 先按比例分配
+
+    # 四舍五入 + 最大剩余法修正到总数
+    k_round = [int(round(x)) for x in k_float]
+    # 先裁剪上下限
+    k_round = [max(K_min, min(K_max, k)) for k in k_round]
+    diff = K_total - sum(k_round)
+
+    # 若总和不等于 K_total，按小数部分/需求大小做增减
+    if diff != 0:
+        # 计算偏差优先级（谁离目标浮点更远谁先调整）
+        prio = sorted(
+            range(len(classes)),
+            key=lambda i: (k_float[i] - k_round[i]),
+            reverse=(diff > 0),
+        )
+        i = 0
+        while diff != 0 and i < len(prio):
+            idx = prio[i]
+            newk = k_round[idx] + (1 if diff > 0 else -1)
+            if K_min <= newk <= K_max:
+                k_round[idx] = newk
+                diff += -1 if diff > 0 else 1
+            i += 1
+
+    K_dict = {c: k for c, k in zip(classes, k_round)}
+    return K_dict
+
+```
