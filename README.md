@@ -283,6 +283,13 @@ Current results indicate that **small-object classes** (e.g., *traffic light*, *
 
 
 
+# Prototype Allocation
+
+This repository provides a utility function to allocate prototype counts per class  
+based on intra-class diversity and sample size.
+
+## Example: Allocate Prototypes
+
 ```python
 
 import torch
