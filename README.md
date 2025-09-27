@@ -7,7 +7,7 @@
   * [Dataset](#3-Dataset-Setup)
   * [Framework Structure](#4-Framework-Structure)
   * [Acknowledgements](#5-Acknowledgements)
-  * [Future Work](#6-FutureWork)
+  * [Future Work](#6-future-work)
 
 
 ## Code Implementation Statement
