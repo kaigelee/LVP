@@ -242,7 +242,7 @@ authors for making the source code publicly available.
 * [DACS](https://github.com/vikolss/DACS)
 
 
-# Future Work
+## Future Work
 
 ## Multi-Prototype Representation
 
