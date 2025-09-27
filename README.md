@@ -241,8 +241,8 @@ authors for making the source code publicly available.
 * [SegFormer](https://github.com/NVlabs/SegFormer)
 * [DACS](https://github.com/vikolss/DACS)
 
+##  6. Future Work
 
-## Future Work
 
 ## Multi-Prototype Representation
 
