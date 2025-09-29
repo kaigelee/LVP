@@ -14,8 +14,6 @@
 
 As discussed in [8](https://github.com/lhoyer/MIC/issues/8), [54](https://github.com/lhoyer/MIC/issues/54) and [63](https://github.com/lhoyer/MIC/issues/63), **our method inherits the instability of [MIC](https://github.com/lhoyer/MIC).** :cry:
 
-To address this, we will release two versions of the code: one designed to produce more stable results with lower standard deviation, and another that achieves higher performance albeit with greater variance. :smiley:
-
 Note, however, that the mathematical expectation of performance is the same for both, i.e., **76.9%** mIoU and **69.9%** mIoU on GTAV→Cityscapes and SYNTHIA→Cityscapes, respectively. :100:
 
 ## 1. Introduction
@@ -359,7 +357,6 @@ def allocate_prototypes(feats_by_class, K_total, K_min=1, K_max=10, alpha=0.7, b
 
 
 ## Code Availability Statement
-This code is associated with a paper currently under review. To comply with the review process, the code will be made FULLY available once the paper is accepted. 
+This code is associated with a paper currently under review. To comply with the review process, the code will be made FULLY available once the paper is accepted.  :smiley:
 
 We appreciate your understanding and patience. Once the code is released, we will warmly welcome any feedback and suggestions. Please stay tuned for our updates!
-
