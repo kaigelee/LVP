@@ -1,5 +1,8 @@
 # <p align=center>`LVP for Domain-Adaptive Semantic Segmentation`</p><!-- omit in toc -->
 
+Kaige Li, Maoxian Wan, Qichuan Geng, Wei Wang, Zhong Zhou, and Xiaochun Cao, IEEE Senior Member
+
+
 ## Table of Contents
 
   * [Introduction](#1-introduction)
