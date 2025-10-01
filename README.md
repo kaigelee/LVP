@@ -2,7 +2,7 @@
 
 Kaige Li, Maoxian Wan, Qichuan Geng, Wei Wang, Zhong Zhou, and Xiaochun Cao*, IEEE Senior Member
 
-*Corresponding author: Xiaochun Cao
+*Corresponding author: [Xiaochun Cao]([https://github.com/lhoyer/MIC/issues/8](https://scholar.google.com/citations?user=PDgp6OkAAAAJ&hl=en)).
 
 ## Table of Contents
 
